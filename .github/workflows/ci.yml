@@ -1,0 +1,68 @@
+name: FastAPI + PostgreSQL CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      db:
+        image: pgvector/pgvector:pg17
+        ports: [5400:5432]
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd="pg_isready -U testuser -d testdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install pytest flake8 requests
+
+      - name: Clean previous cache/logs
+        run: |
+          rm -rf .pytest_cache
+          rm -rf tmp || true
+
+      - name: Lint code
+        run: flake8 . --exit-zero
+
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5400 -U testuser; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+
+      - name: Run tests
+        run: |
+          export PYTHONPATH=$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/app
+          export TEST_ENV=true
+          pytest test/ -q --maxfail=1 --disable-warnings -v
+
+      - name: Clean after tests
+        run: |
+          rm -rf .pytest_cache
+          rm -rf tmp || true

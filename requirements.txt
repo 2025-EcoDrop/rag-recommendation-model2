@@ -1,0 +1,16 @@
+# pip install -r requirements.txt
+fastapi
+uvicorn[standard]
+transformers
+torch
+sqlalchemy
+psycopg2-binary # 개발용
+pgvector
+numpy
+python-dotenv
+pydantic
+sentence-transformers
+accelerate
+
+httpx
+pytest
