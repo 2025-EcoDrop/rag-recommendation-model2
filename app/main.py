@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import chat
+from app.routes import recommend
 
 # uvicorn app.main:app --reload --port 8000
 
