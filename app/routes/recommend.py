@@ -11,7 +11,7 @@ router = APIRouter()
 IS_TEST = os.getenv("TEST_ENV") == "true"
 
 if not IS_TEST:
-    @router.post("/chat", response_model=QueryResponse)
+    @router.post("/recommend", response_model=QueryResponse)
     async def chat(request: QueryRequest, db: Session = Depends(deps.get_db)):
         query = request.query
         user_id = request.user_id
