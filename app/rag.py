@@ -49,7 +49,7 @@ async def search_knowledge_base(db: Session, squery: str, user_id: int | None = 
         similarity_score_rows = [[(k - index) * 2, row] for index, row in enumerate(rows)]
 
         if user_id is not None:
-            # review 중 product_name이 rows.product_name과 일치하고, 별점 4~5, "public_date == True"인 경우(공공데이터를 사용한 경우)
+            # review 중 product_name이 rows.product_name과 일치하고, rating >= 3~5, "public_date == True"인 경우(공공데이터를 사용한 경우)
             user_reviews = (db.query(Review.product_name, Review.rating)
                             .filter(
                                 Review.author_id == user_id,
