@@ -23,7 +23,7 @@ async def search_embed_text(db: Session, squery: str, k: int = 20):
     if not IS_TEST:
         q_embed = await embed_text(squery)
 
-        rows = (db.query(DrugEmbedding.id, DrugEmbedding.embedding)
+        rows = (db.query(DrugEmbedding.id)
                 .order_by(DrugEmbedding.embedding.op("<->")(q_embed.tolist())) # L2 distance
                 .limit(k)
                 .all())
@@ -36,7 +36,7 @@ async def search_knowledge_base(db: Session, squery: str, user_id: int | None = 
     if not IS_TEST:
         results = await search_embed_text(db, squery, k)
 
-        rows = (db.query(Drug.id, Drug.company_name, Drug.product_name, Drug.efficacy, Drug.use, Drug.caution_warn, Drug.caution, Drug.interaction, Drug.side_effect)
+        rows = (db.query(Drug.id, Drug.company_name, Drug.product_name)
                 .filter(Drug.id.in_(results))
                 .order_by(
                     sa.case(
